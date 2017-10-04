@@ -1,0 +1,34 @@
+# Scala 
+
+target
+.idea
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/RUNNING_PID
+bin/
+lib/
+logs/
+modules/
+project/project
+project/target
+target/
+tmp/
+test-result
+server.pid
+*.eml
+/dist/
+.cache
+libexec/
+.sbtserver
+.sbtserver.lock
+.DS_Store
+
+# Terraform
+local-variables.tfvar
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform
+local-variables.tfvars
