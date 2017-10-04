@@ -4,8 +4,8 @@ My third year dissertation project.
 # Deploying a new Scala service
 1. sbt docker:publishLocal
 2. docker login
-3. docker tag <image-tag> <docker-username>/<image-name>
-4. docker push <docker-username>/<image-name>
+3. docker tag image-tag docker-username/image-name
+4. docker push docker-username/image-name
 5. update the terraform variables to have the new version number and docker image name. 
 6. terraform plan (params)
 7. terraform apply (params)
