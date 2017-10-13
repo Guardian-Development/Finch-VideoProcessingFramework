@@ -1,6 +1,8 @@
 # Terraform Infrastructure
 The infrastructure required to run the application in production on AWS.
 
+![alt text](/Diagram/InfrastructureDiagram.png?raw=true)
+
 # Requirements 
 - Terraform must be installed and on the PATH on the cmd
 - You must specify the parameters:
