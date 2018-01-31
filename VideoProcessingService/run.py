@@ -10,6 +10,7 @@ from video_processing.frame_processing import ResizeFrameProcessor, BlackAndWhit
 from video_processing.detector import CarDetector, PersonDetector
 from video_processing.stopping_criteria import QuitButtonPressedStoppingCriteria
 from video_output.video_output import LocalDisplayVideoOutput
+from message_sending.sender import ApacheKafkaMessageSender
 
 if __name__ == '__main__':
     ARGUMENTS = process_command_line_arguments()
@@ -27,7 +28,12 @@ if __name__ == '__main__':
                     car_cascade_src="video_processing/detection_models/car_cascade.xml"))\
                 .with_video_processing_stage(PersonDetector())\
                 .with_video_output_stage(LocalDisplayVideoOutput())\
-                .with_processing_stopping_criteria(QuitButtonPressedStoppingCriteria())\
-                .build()
+                .with_processing_stopping_criteria(QuitButtonPressedStoppingCriteria())
+    
+    if ARGUMENTS.kafkaurl is not None and ARGUMENTS.kafkatopic is not None:
+        # Test of ability to send message to Apache Kafka
+        TEST_KAFKA_SENDER = ApacheKafkaMessageSender(
+            server_address=ARGUMENTS.kafkaurl, topic=ARGUMENTS.kafkatopic)
+        TEST_KAFKA_SENDER.send_message("test message")
 
-    start_application(PIPELINE)
+    start_application(PIPELINE.build())
