@@ -1,28 +1,27 @@
-resolvers in ThisBuild ++= Seq(
-    "Apache Development Snapshot Repository" at "https://repository.apache.org/content/repositories/snapshots/",
-    Resolver.mavenLocal
-)
-
 name := "ActivityAnalysisService"
-
 version := "0.1-SNAPSHOT"
-
 organization := "newcastleuniversity.joehonour"
-
 scalaVersion in ThisBuild := "2.11.7"
 
 val flinkVersion = "1.4.1"
 
 val flinkDependencies = Seq(
   "org.apache.flink" %% "flink-scala" % flinkVersion % "provided",
-  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided")
+  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided",
+  "org.apache.flink" %% "flink-connector-kafka-0.11" % flinkVersion)
+
+val jsonParsingDependencies = Seq(
+  "org.json4s" %% "json4s-native" % "3.6.0-M2",
+  "org.json4s" %% "json4s-jackson" % "3.6.0-M2"
+)
 
 lazy val root = (project in file(".")).
   settings(
-    libraryDependencies ++= flinkDependencies
+    libraryDependencies ++= flinkDependencies,
+    libraryDependencies ++= jsonParsingDependencies
   )
 
-mainClass in assembly := Some("newcastleuniversity.joehonour.Job")
+mainClass in assembly := Some("newcastleuniversity.joehonour.Main")
 
 // make run command include the provided dependencies
 run in Compile := Defaults.runTask(fullClasspath in Compile,

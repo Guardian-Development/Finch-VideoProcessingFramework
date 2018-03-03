@@ -15,6 +15,7 @@ Project built from template engine found: https://ci.apache.org/projects/flink/f
 2. Java 8 Install 
     - sudo apt-get install default-jdk
 3. Install SBT
+    - echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list 
     - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
     - sudo apt-get update
     - sudo apt-get install sbt
@@ -35,3 +36,15 @@ From within the activityanalysisservice folder run:
 ### IntelliJ
 - Edit Configurations -> Add Configuration -> sbt Task 
 - Then enter into Tasks: clean run
+
+## Running in Flink Cluster
+1. Build project into fat jar
+    - sbt clean assembly (from within project folder)
+2. Submit job to flink: 
+    - flink-1.4.1/bin/flink run path-to-fat-jar (command line options)
+3. To see job running visit: 
+    - localhost:8081
+
+To view stdout from the flink task running:
+- tail -f flink-1.4.1/log/flink*-taskmanager-*.out
+
