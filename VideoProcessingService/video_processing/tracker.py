@@ -93,7 +93,7 @@ class Tracker(Detector):
         :param detected_object: the location of the object to track within the frame
         :return: true if we could initialise a tracker, else false
         """
-        new_tracker = cv2.TrackerMIL_create()
+        new_tracker = cv2.TrackerKCF_create()
         ok = new_tracker.init(frame,
                               (detected_object.x_position,
                                detected_object.y_position,
