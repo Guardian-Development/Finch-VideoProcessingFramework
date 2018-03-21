@@ -1,6 +1,6 @@
-# Spark Insfrastructure
+# Neo4j Infrastructure
 
-The production infrastructure required to run Apache Spark publicly on AWS. Sets up a 3 node Spark cluster (1 node master, 2 nodes workers)
+The production infrastructure required to run Neo4j database publicly on AWS. 
 
 ## Requirements
 
@@ -17,7 +17,7 @@ The production infrastructure required to run Apache Spark publicly on AWS. Sets
 3. In the current directory: terraform plan (params) -var-file="secret.tfvars"
 4. terraform apply (params) -var-file="secret.tfvars"
 
-The output parameter of the Job Manager gives you the IP to access the Spark UI, This should be done on port 8080. 
+The output parameter of the Neo4j instance gives you the IP to access the Neo4j UI, This should be done on port 7474. 
 
 ## To Destroy
 
