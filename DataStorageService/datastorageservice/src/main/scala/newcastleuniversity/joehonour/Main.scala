@@ -1,8 +1,11 @@
 package newcastleuniversity.joehonour
 
+import java.util.Properties
+
+import newcastleuniversity.joehonour.input_streams.InputStreams
+import newcastleuniversity.joehonour.message_graph_converters._
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
-import org.neo4j.driver.v1.{AuthTokens, GraphDatabase}
-import org.neo4j.driver.v1.Config
+import org.neo4j.driver.v1._
 
 object Main {
 
@@ -11,34 +14,70 @@ object Main {
     val properties = CommandLineParser.parseCommandLineArguments(args)
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    val inputStream = env
+    val frameInputStream = env
       .addSource(InputStreams.kafkaStreamForFrameMessageTopic(properties))
-      .flatMap { _.detected_objects }
 
-    inputStream.map(o => {
-      val config = Config.build.withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig
-      val driver = GraphDatabase.driver(
-        properties.getProperty("neo4j.connection.url"),
-        AuthTokens.basic(
-          properties.getProperty("neo4j.database.username"),
-          properties.getProperty("neo4j.database.password")),
-        config)
-      val session = driver.session
-      val script =
-        s"""
-           |CREATE (object:DetectedObject {
-           |  type:'${o.`type`}',
-           |  uuid:'${o.uuid}',
-           |  y_position:${o.y_position},
-           |  x_position:${o.x_position},
-           |  width:${o.width},
-           |  height:${o.height}})
-           |""".stripMargin
-      session.run(script)
+    frameInputStream.map(f => {
+      val (driver, session) = databaseSessionFor(properties)
+      val frameCreation = FrameConverter.toCreateScript(f)
+      session.run(frameCreation)
+
+      f.detected_objects.foreach(o => {
+        val objectCreation = DetectedObjectConverter.toCreateScript(o)
+        session.run(objectCreation)
+
+        val objectToFrame = RelationshipConverter.detectedObjectToFrameRelationship(o, f)
+        session.run(objectToFrame)
+      })
+
+      session.close()
+      driver.close()
+    })
+
+    val activityInputStream = env
+        .addSource(InputStreams.kafkaStreamForActivityMessageTopic(properties))
+
+    activityInputStream.map(o => {
+      val (driver, session) = databaseSessionFor(properties)
+      val creationScript = ActivityObservedConverter.toCreateScript(o)
+      session.run(creationScript)
+
+      val activityToObservations = RelationshipConverter.activityToDetectedObjectRelationship(o)
+      session.run(activityToObservations)
+
+      session.close()
+      driver.close()
+    })
+
+    val anomalyInputStream = env
+        .addSource(InputStreams.kafkaStreamForAnomalyMessageTopic(properties))
+
+    anomalyInputStream.map(o => {
+      val (driver, session) = databaseSessionFor(properties)
+      val creationScript = AnomalyScoreConverter.toCreateScript(o)
+      session.run(creationScript)
+
+      val anomalyToActivity = RelationshipConverter.anomalyToActivityObservedRelationship(o)
+      val anomalyToCluster = RelationshipConverter.anomalyToClusterRelationship(o)
+      session.run(anomalyToActivity)
+      session.run(anomalyToCluster)
+
       session.close()
       driver.close()
     })
 
     env.execute("data-storage-task")
+  }
+
+  private def databaseSessionFor(properties: Properties): (Driver, Session) = {
+    val config = Config.build.withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig
+    val driver = GraphDatabase.driver(
+      properties.getProperty("neo4j.connection.url"),
+      AuthTokens.basic(
+        properties.getProperty("neo4j.database.username"),
+        properties.getProperty("neo4j.database.password")),
+      config)
+    val session = driver.session
+    (driver, session)
   }
 }
