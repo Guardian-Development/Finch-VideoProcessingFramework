@@ -1,6 +1,6 @@
-# Newcastle University Dissertation
+# Finch Video Processing Framework
 
-My third year dissertation project.
+My third year dissertation project. Provides real-time analysis on multiple concurrent video feeds, with the ability to scale to thousands of video sources.
 
 ## Projects
 
